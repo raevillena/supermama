@@ -97,10 +97,12 @@
 
     # Test cron job manually
     /usr/bin/python3 /home/$USER/web_automation.py
-    
+
 8. Customize for Your Use Case
     Edit ~/web_automation.py and change:
 
     target_url: Your target website
     input_text: The text you want to type
     input_selectors: CSS selectors for your target site's input fields
+
+

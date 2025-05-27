@@ -64,35 +64,78 @@ def web_automation_task():
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
         
-        # Find input element - ADJUST THESE SELECTORS FOR YOUR TARGET SITE
+        # Find input element - Handle initially hidden ID input
         input_selectors = [
             "#id_number",                    # ID selector (most reliable)
             "input[name='id_number']",       # Name attribute selector
             "input[id='id_number']",         # ID attribute selector
-            "input[placeholder='Scan Identification Card']",  # Placeholder selector
         ]
         
         input_element = None
         for selector in input_selectors:
             try:
+                # First, try to find the element (even if hidden)
+                input_element = WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+                )
+                logging.info(f"Found input element with selector: {selector}")
+                
+                # Check if element is visible
+                if input_element.is_displayed():
+                    logging.info("Element is visible")
+                else:
+                    logging.info("Element found but hidden - attempting to make visible")
+                    
+                    # Try clicking somewhere on the page to activate the field
+                    body = driver.find_element(By.TAG_NAME, "body")
+                    body.click()
+                    time.sleep(1)
+                    
+                    # Or try executing JavaScript to make it visible
+                    driver.execute_script("""
+                        var element = arguments[0];
+                        element.style.height = '40px';
+                        element.style.opacity = '1';
+                        element.style.visibility = 'visible';
+                    """, input_element)
+                    
+                    time.sleep(1)
+                
+                # Try to make it clickable
                 input_element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
                 )
-                logging.info(f"Found input element with selector: {selector}")
                 break
-            except:
+                
+            except Exception as e:
+                logging.warning(f"Selector {selector} failed: {e}")
                 continue
         
         if not input_element:
             logging.error("Could not find input element")
             return False
         
-        # Input text - CHANGE THIS TEXT
-        input_text = "0855629315"  # Replace with your text
+        # Input text - Your ID number
+        input_text = "0855629315"  # Replace with your actual ID number
         logging.info(f"Typing: {input_text}")
         
-        input_element.clear()
-        input_element.send_keys(input_text)
+        # Clear and type - handle hidden element
+        try:
+            # Focus on the element first
+            driver.execute_script("arguments[0].focus();", input_element)
+            
+            # Clear and type
+            input_element.clear()
+            input_element.send_keys(input_text)
+            
+        except Exception as e:
+            logging.warning(f"Normal input failed, trying JavaScript: {e}")
+            # If normal typing fails, use JavaScript
+            driver.execute_script("""
+                arguments[0].value = arguments[1];
+                arguments[0].dispatchEvent(new Event('input', { bubbles: true }));
+                arguments[0].dispatchEvent(new Event('change', { bubbles: true }));
+            """, input_element, input_text)
         
         # Press Enter
         logging.info("Pressing Enter")
