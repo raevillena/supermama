@@ -4,8 +4,10 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 import logging
 import os
@@ -21,7 +23,7 @@ logging.basicConfig(
 )
 
 def setup_driver():
-    """Configure Chrome for Ubuntu 20.04"""
+    """Configure Chrome with WebDriver Manager"""
     options = Options()
     
     # Run headless (no GUI)
@@ -30,15 +32,12 @@ def setup_driver():
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
-    
-    # Additional stability options
-    options.add_argument('--disable-web-security')
-    options.add_argument('--disable-features=VizDisplayCompositor')
     options.add_argument('--disable-extensions')
     
     try:
-        # ChromeDriver should be in PATH after installation
-        driver = webdriver.Chrome(options=options)
+        # WebDriver Manager automatically downloads and manages ChromeDriver
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
         return driver
     except Exception as e:
         logging.error(f"Failed to initialize driver: {e}")
@@ -55,8 +54,8 @@ def web_automation_task():
         if not driver:
             return False
             
-        # Navigate to webpage
-        target_url = "https://example.com"  # Replace with your URL
+        # Navigate to webpage - CHANGE THIS URL
+        target_url = "https://www.google.com"  # Replace with your target URL
         logging.info(f"Opening {target_url}")
         driver.get(target_url)
         
@@ -65,8 +64,9 @@ def web_automation_task():
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
         
-        # Find input element (adjust selector as needed)
+        # Find input element - ADJUST THESE SELECTORS FOR YOUR TARGET SITE
         input_selectors = [
+            "input[name='q']",  # Google search box
             "input[type='text']",
             "input[type='search']", 
             "#search",
@@ -80,6 +80,7 @@ def web_automation_task():
                 input_element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
                 )
+                logging.info(f"Found input element with selector: {selector}")
                 break
             except:
                 continue
@@ -88,8 +89,8 @@ def web_automation_task():
             logging.error("Could not find input element")
             return False
         
-        # Clear any existing text and input new text
-        input_text = "Your automated input here"  # Replace with your text
+        # Input text - CHANGE THIS TEXT
+        input_text = "Hello from automation script!"  # Replace with your text
         logging.info(f"Typing: {input_text}")
         
         input_element.clear()
@@ -99,11 +100,13 @@ def web_automation_task():
         logging.info("Pressing Enter")
         input_element.send_keys(Keys.RETURN)
         
-        # Optional: Wait to see results
-        time.sleep(2)
+        # Wait to see results
+        time.sleep(3)
         
         # Optional: Take screenshot for verification
-        screenshot_path = f"/home/{os.getenv('USER')}/screenshots/automation_{int(time.time())}.png"
+        screenshots_dir = f"/home/{os.getenv('USER')}/screenshots"
+        os.makedirs(screenshots_dir, exist_ok=True)
+        screenshot_path = f"{screenshots_dir}/automation_{int(time.time())}.png"
         driver.save_screenshot(screenshot_path)
         logging.info(f"Screenshot saved: {screenshot_path}")
         
@@ -120,11 +123,6 @@ def web_automation_task():
             logging.info("Browser closed")
 
 if __name__ == "__main__":
-    # Create screenshots directory
-    import os
-    screenshots_dir = f"/home/{os.getenv('USER')}/screenshots"
-    os.makedirs(screenshots_dir, exist_ok=True)
-    
     # Run the automation
     success = web_automation_task()
     exit(0 if success else 1)
