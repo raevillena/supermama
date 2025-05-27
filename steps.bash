@@ -18,22 +18,22 @@
 
 3. Save and Test the Script
     # Save the script
-    nano ~/web_automation.py
+    nano main.py
     # Copy the script content above and save (Ctrl+X, Y, Enter)
 
     # Make it executable
-    chmod +x ~/web_automation.py
+    chmod +x main.py
 
     # Test the script
-    python3 ~/web_automation.py
+    python3 main.py
 
 4. Create Scheduler Script (Optional)
     # Save scheduler script
-    nano ~/scheduler.py
+    nano scheduler.py
     # Copy the scheduler content and save
 
     # Make executable
-    chmod +x ~/scheduler.py
+    chmod +x scheduler.py
 
 5. Testing Steps
     python3 -c "

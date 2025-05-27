@@ -22,7 +22,7 @@ logging.basicConfig(
     ]
 )
 
-def setup_driver():
+def setup_driver(timezone="Asia/Manila"):
     """Configure Chrome with WebDriver Manager"""
     options = Options()
     
@@ -38,6 +38,13 @@ def setup_driver():
         # WebDriver Manager automatically downloads and manages ChromeDriver
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=options)
+        
+        # Set timezone using Chrome DevTools Protocol
+        driver.execute_cdp_cmd('Emulation.setTimezoneOverride', {
+            'timezoneId': timezone
+        })
+        
+        logging.info(f"Timezone set to: {timezone}")
         return driver
     except Exception as e:
         logging.error(f"Failed to initialize driver: {e}")
@@ -50,7 +57,7 @@ def web_automation_task():
         logging.info("Starting web automation task...")
         
         # Setup driver
-        driver = setup_driver()
+        driver = setup_driver("Asia/Manila")
         if not driver:
             return False
             
