@@ -55,7 +55,7 @@ def web_automation_task():
             return False
             
         # Navigate to webpage - CHANGE THIS URL
-        target_url = "https://www.google.com"  # Replace with your target URL
+        target_url = "https://logger.mmsu.edu.ph/dtr/W3MjfXVR5mmjtuBX62byZAnBHpGCJu4YR9EWLrJvyfZuPpSXNq/3e4fbd92ff7fe35265113af58720926d"  # Replace with your target URL
         logging.info(f"Opening {target_url}")
         driver.get(target_url)
         
@@ -66,12 +66,10 @@ def web_automation_task():
         
         # Find input element - ADJUST THESE SELECTORS FOR YOUR TARGET SITE
         input_selectors = [
-            "input[name='q']",  # Google search box
-            "input[type='text']",
-            "input[type='search']", 
-            "#search",
-            ".search-input",
-            "textarea"
+            "#id_number",                    # ID selector (most reliable)
+            "input[name='id_number']",       # Name attribute selector
+            "input[id='id_number']",         # ID attribute selector
+            "input[placeholder='Scan Identification Card']",  # Placeholder selector
         ]
         
         input_element = None
@@ -90,7 +88,7 @@ def web_automation_task():
             return False
         
         # Input text - CHANGE THIS TEXT
-        input_text = "Hello from automation script!"  # Replace with your text
+        input_text = "0855629315"  # Replace with your text
         logging.info(f"Typing: {input_text}")
         
         input_element.clear()
